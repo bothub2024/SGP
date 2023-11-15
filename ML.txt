@@ -1,0 +1,37 @@
+clc;clear all
+% Step1 : Obtain Power Injections Pi= Pg- Pl & Qi=Qg-Ql 
+pi2=0.7-0.3;
+qi2=0.5-0.2;
+pi3=0-0.6;
+qi3=0-0.4;
+% Step2: Construct Y bus
+Y=[-9i 5i 4i
+ 5i -9i 4i
+ 4i 4i -8i];
+% Step 3 (a): Inital values for V2 and V3
+V2=1; V3=1;
+% Step3 (b): Iterative computation of V2 and V3
+disp('Iterations V2 d2 V3 d3')
+for k=1:20
+V2iter=1/Y(2,2)*((pi2-i*qi2)/conj(V2)-Y(2,1)*1.02- Y(2,3)*V3);
+%Check for convergence
+if(abs(V2iter-V2)<= 0.00001)
+ return % if the solution is obtained 
+end
+% if it does not converge
+V2=V2iter;
+V3=1/Y(3,3)*((pi3-i*qi3)/conj(V3)-Y(3,1)*1.02- Y(3,2)*V2);
+iter=[k abs(V2) angle(V2)*180/pi abs(V3) angle(V3)*180/pi];
+disp(iter)
+end
+
+
+Iterations V2 d2 V3 d3
+ 1.0000 1.0454 2.4366 0.9836 -3.0757
+ 2.0000 1.0335 1.1297 0.9738 -3.7223
+ 3.0000 1.0301 0.8641 0.9710 -3.8829
+ 4.0000 1.0290 0.8022 0.9701 -3.9231
+ 5.0000 1.0287 0.7876 0.9699 -3.9334
+ 6.0000 1.0286 0.7841 0.9698 -3.9362
+ 7.0000 1.0286 0.7832 0.9698 -3.9369 
+ Note: From above GS Method converged at 7th iteration.
