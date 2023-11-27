@@ -1,0 +1,159 @@
+1.y-bus
+clear all;
+clc;
+display('----------Ybus formation code--------');
+nbranch=input('enter the number of branches in system = ');
+display('enter line data');
+for n=1:1:nbranch
+ 
+ fb=input('enter from bus = ');
+ tb=input('enter to bus = ');
+ r=input('enter value of resistance = ');
+ x=input('enter value of reactance = '); 
+ B=input('enter the value of line charging admittance(b/2) = ');
+ fprintf('\n\n')
+ z=r+i*x;
+ y=1./z;
+ data(n,:)=[fb tb r x B y];
+end
+fb=data(:,1);
+tb=data(:,2);
+r=data(:,3);
+x=data(:,4);
+b=data(:,5);
+y=data(:,6);
+b=i*b;
+nbus=max(max(fb),max(tb));
+Y=zeros(nbus,nbus);
+% off diagonal element
+for k=1:nbranch
+ Y(fb(k),tb(k))=Y(fb(k),tb(k))-y(k);
+ Y(tb(k),fb(k))=Y(fb(k),tb(k));
+end
+% diagonal element
+for m=1:nbus
+ for n=1:nbranch
+ if fb(n)==m 
+ Y(m,m)=Y(m,m)+y(n)+b(n);
+ elseif tb(n)==m 
+ Y(m,m)=Y(m,m)+y(n)+b(n);
+ end
+ end
+end
+Y_bus=Y
+Z_bus=Y_bus^-1
+1.7 OUTPUT
+Y_bus =
+ 3.0000 - 9.0000i -2.0000 + 6.0000i -1.0000 + 3.0000i 0 
+ -2.0000 + 6.0000i 3.6667 -11.0000i -0.6667 + 2.0000i -1.0000 + 3.0000i
+ -1.0000 + 3.0000i -0.6667 + 2.0000i 3.6667 -11.0000i -2.0000 + 6.0000i
+ 0 -1.0000 + 3.0000i -2.0000 + 6.0000i 3.0000 - 9.0000i
+Z_bus =
+ 1.0e+15 *
+ 0.0000 - 1.1259i 0.0000 - 1.1259i 0.0000 - 1.1259i 0.0000 - 1.1259i
+ 0.0000 - 1.1259i 0.0000 - 1.1259i 0.0000 - 1.1259i 0.0000 - 1.1259i
+ 0.0000 - 1.1259i 0.0000 - 1.1259i 0.0000 - 1.1259i 0.0000 - 1.1259i
+ 0.0000 - 1.1259i 0.0000 - 1.1259i 0 - 1.1259i 0 - 1.1259
+2.z-bus
+linedata = [1 1 2 0.001 0.015 0.001 
+2 2 3 0.002 0.021 0.0005 
+3 3 1 0.004 0.046 0.0015 ]; 
+fb = linedata(:,1); 
+tb = linedata(:,2); 
+r = linedata(:,3); 
+x = linedata(:,4); 
+b = linedata(:,5); 
+z = r + i*x; 
+y = 1./z; b = i*b; 
+nbus = max(max(fb),max(tb)); 
+nbranch = length(fb); 
+Y = zeros(nbus,nbus); 
+for k=1:nbranch 
+Y(fb(k),tb(k)) = Y(fb(k),tb(k))-y(k); 
+Y(tb(k),fb(k)) = Y(fb(k),tb(k)); 
+end 
+for m =1:nbus 
+for n =1:nbranch 
+if fb(n) == m 
+Y(m,m) = Y(m,m) + y(n)+ b(n); 
+elseif tb(n) == m 
+Y(m,m) = Y(m,m) + y(n) + b(n); 
+end 
+end 
+end 
+Y 
+zbus = inv(Y)
+2.7 OUTPUT:
+Y =
+ 0 + 0.0150i 0 0 
+ 0 0 + 0.0210i 0 
+ 0 0 0 + 0.0460i
+zbus =
+ 0 -66.6667i 0 0 
+ 0 0 -47.6190i 0 
+ 0 0 0 -21.7391i
+3.gauss
+clc;clear all
+% Step1 : Obtain Power Injections Pi= Pg- Pl & Qi=Qg-Ql 
+pi2=0.7-0.3;
+qi2=0.5-0.2;
+pi3=0-0.6;
+qi3=0-0.4;
+% Step2: Construct Y bus
+Y=[-9i 5i 4i
+ 5i -9i 4i
+ 4i 4i -8i];
+% Step 3 (a): Inital values for V2 and V3
+V2=1; V3=1;
+% Step3 (b): Iterative computation of V2 and V3
+disp('Iterations V2 d2 V3 d3')
+for k=1:20
+V2iter=1/Y(2,2)*((pi2-i*qi2)/conj(V2)-Y(2,1)*1.02- Y(2,3)*V3);
+%Check for convergence
+if(abs(V2iter-V2)<= 0.00001)
+ return % if the solution is obtained 
+end
+% if it does not converge
+V2=V2iter;
+V3=1/Y(3,3)*((pi3-i*qi3)/conj(V3)-Y(3,1)*1.02- Y(3,2)*V2);
+iter=[k abs(V2) angle(V2)*180/pi abs(V3) angle(V3)*180/pi];
+disp(iter)
+end
+3.7 OUTPUT
+Iterations V2 d2 V3 d3
+ 1.0000 1.0454 2.4366 0.9836 -3.0757
+ 2.0000 1.0335 1.1297 0.9738 -3.7223
+ 3.0000 1.0301 0.8641 0.9710 -3.8829
+ 4.0000 1.0290 0.8022 0.9701 -3.9231
+ 5.0000 1.0287 0.7876 0.9699 -3.9334
+ 6.0000 1.0286 0.7841 0.9698 -3.9362
+ 7.0000 1.0286 0.7832 0.9698 -3.9369 
+ Note: From above GS Method converged at 7th iteration.
+5.symmetrical components
+% MATLAB Program to convert phase to symmetrical components
+% Input Argument
+% vabc = [phase A magnitude, phase A angle (degree);
+% phase B magnitude, phase B angle (degree);
+% phase C magnitude, phase C angle (degree)]
+vabc=input('Enter phase quantities == ') 
+[x, y]=pol2cart((pi*vabc(1,2))/180,vabc(1,1));
+pa = complex(x,y);
+[x, y]=pol2cart((pi*vabc(2,2))/180,vabc(2,1));
+pb = complex(x,y);
+[x, y]=pol2cart((pi*vabc(3,2))/180,vabc(3,1));
+pc = complex(x,y);
+a = -0.5+0.866i;
+a2 = -0.5-0.866i;
+A1 = [1 1 1;1 a a2;1 a2 a]/3;
+mag = abs(A1*[pa;pb;pc]);
+ang = (angle(A1*[pa;pb;pc])*180)/pi;
+% Output Argument
+% v012 = [zero sequence magnitude, zero sequence angle (degree);
+% positive sequence magnitude, positive sequence angle(degree);
+% negative sequence magnitude, negative sequence angle(degree)]
+v012 = horzcat(mag, ang)
+5.7 OUTPUT
+v012 =
+ 0.5389 104.7485
+ 0.7317 4.8332
+ 0.5694 45.6502
